@@ -1,4 +1,3 @@
-import huggingface_hub
 import streamlit as st
 from dotenv import load_dotenv
 from PyPDF2 import PdfReader
@@ -7,8 +6,8 @@ from langchain.embeddings import HuggingFaceInstructEmbeddings
 from langchain.vectorstores.faiss import FAISS
 from langchain.chains import ConversationalRetrievalChain
 from htmlTemplates import css, bot_template, user_template
-from huggingface_hub import InferenceClient
 from langchain.chains.conversation.memory import ConversationBufferMemory
+from langchain.llms import HuggingFaceHub
 
 
 def get_pdf_text(pdf_docs):
@@ -39,7 +38,11 @@ def get_vectorstore(text_chunks):
     return vectorstore
     
 def get_converse_chain(vectorstore):
-    llm = huggingface_hub(repo_id = "google/flan-t5-xxl", model_kwargs={"temperature": 0.5, "max_length": 512})
+    repo_id = "google/flan-t5-xxl"
+    llm = HuggingFaceHub(
+    repo_id=repo_id, model_kwargs={"temperature": 0.5, "max_length": 64}
+    )
+    
     memory = ConversationBufferMemory(memory_key = 'chat_history', return_messages = True)
     converse_chain = ConversationalRetrievalChain.from_llm(
         llm = llm,
@@ -47,24 +50,6 @@ def get_converse_chain(vectorstore):
         memory = memory
     )
     return converse_chain
-
-# def get_converse_chain(vectorstore):
-#     try:
-#         llm = InferenceClient(model="google/flan-t5-xxl")
-#         print("Model loaded successfully!")
-#     except Exception as e:
-#         print("Failed to load model!")
-#         print("Error: ", e)
-#         return None
-
-#     memory = ConversationBufferMemory(memory_key='chat_history', return_messages=True)
-#     converse_chain = ConversationalRetrievalChain.from_llm(
-#         llm=llm,
-#         retriever = vectorstore.as_retriever(),
-#         memory = memory
-#     )
-    
-#     return converse_chain
 
 def handle_userinput(user_question):
     response = st.session_state.converse({'question': user_question})
@@ -94,7 +79,7 @@ def main():
         if st.button("Process"):
             with st.spinner("Processing"):
                 raw_text = get_pdf_text(pdf_docs)
-                st.write("Raw Text:", raw_text)
+                # st.write("Raw Text:", raw_text)
                 
                 text_chunks = get_text_chunks(raw_text)
                 st.write("Text chunks:", text_chunks)
