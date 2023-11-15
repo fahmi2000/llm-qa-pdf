@@ -1,3 +1,4 @@
+import huggingface_hub
 import streamlit as st
 from dotenv import load_dotenv
 from PyPDF2 import PdfReader
@@ -37,34 +38,33 @@ def get_vectorstore(text_chunks):
     vectorstore = FAISS.from_texts(texts = text_chunks, embedding = embeddings)
     return vectorstore
     
-# def get_converse_chain(vectorstore):
-#     # llm = ChatOpenAI()
-#     llm = HuggingFaceHub(repo_id = "google/flan-t5-xxl", model_kwargs={"temperature": 0.5, "max_length": 512})
-#     memory = ConversationBufferMemory(memory_key = 'chat_history', return_messages = True)
-#     converse_chain = ConversationalRetrievalChain.from_llm(
-#         llm = llm,
-#         retriever = vectorstore.as_retriever(),
-#         memory = memory
-#     )
-#     return converse_chain
-
 def get_converse_chain(vectorstore):
-    try:
-        llm = InferenceClient(model="google/flan-t5-xxl")
-        print("Model loaded successfully!")
-    except Exception as e:
-        print("Failed to load model!")
-        print("Error: ", e)
-        return None
-
-    memory = ConversationBufferMemory(memory_key='chat_history', return_messages=True)
+    llm = huggingface_hub(repo_id = "google/flan-t5-xxl", model_kwargs={"temperature": 0.5, "max_length": 512})
+    memory = ConversationBufferMemory(memory_key = 'chat_history', return_messages = True)
     converse_chain = ConversationalRetrievalChain.from_llm(
-        llm=llm,
+        llm = llm,
         retriever = vectorstore.as_retriever(),
         memory = memory
     )
-    
     return converse_chain
+
+# def get_converse_chain(vectorstore):
+#     try:
+#         llm = InferenceClient(model="google/flan-t5-xxl")
+#         print("Model loaded successfully!")
+#     except Exception as e:
+#         print("Failed to load model!")
+#         print("Error: ", e)
+#         return None
+
+#     memory = ConversationBufferMemory(memory_key='chat_history', return_messages=True)
+#     converse_chain = ConversationalRetrievalChain.from_llm(
+#         llm=llm,
+#         retriever = vectorstore.as_retriever(),
+#         memory = memory
+#     )
+    
+#     return converse_chain
 
 def handle_userinput(user_question):
     response = st.session_state.converse({'question': user_question})
