@@ -94,16 +94,16 @@ def main():
         if st.button("Process"):
             with st.spinner("Processing"):
                 raw_text = get_pdf_text(pdf_docs)
+                st.write("Raw Text:", raw_text)
                 
-                # text_chunks = get_text_chunks(raw_text)
-                
-                print("Raw Text:", raw_text)
+                text_chunks = get_text_chunks(raw_text)
+                st.write("Text chunks:", text_chunks)
 
-                # vectorstore = get_vectorstore(text_chunks)
-                # print("Vectorstore:", vectorstore)
+                vectorstore = get_vectorstore(text_chunks)
+                st.write("Vectorstore:", vectorstore)
 
-                # st.session_state.converse = get_converse_chain(vectorstore)
-                # print("Converse Chain:", st.session_state.converse)
+                st.session_state.converse = get_converse_chain(vectorstore)
+                st.write("Converse Chain:", st.session_state.converse)
 
 
 if __name__ == '__main__':
