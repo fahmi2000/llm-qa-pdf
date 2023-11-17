@@ -52,26 +52,40 @@ def get_conversation_chain(vectorstore):
     return conversation_chain
 
 
+# def handle_userinput(user_question):
+#     # Check the number of tokens in the input text
+#     tokenizer = T5Tokenizer.from_pretrained("google/flan-t5-xxl")
+#     tokens = tokenizer.encode(user_question, return_tensors="pt")
+#     print("Number of tokens in input:", tokens.size(1))
+
+#     # Send the user question to the model
+#     print("User's question:", user_question)
+#     response = st.session_state.conversation({'question': user_question})
+#     st.session_state.chat_history = response['chat_history']
+
+#     for i, message in enumerate(st.session_state.chat_history):
+#         if i % 2 == 0:
+#             st.write(user_template.replace(
+#                 "{{MSG}}", message.content), unsafe_allow_html=True)
+#         else:
+#             st.write(bot_template.replace(
+#                 "{{MSG}}", message.content), unsafe_allow_html=True)
+
 def handle_userinput(user_question):
     # Check the number of tokens in the input text
     tokenizer = T5Tokenizer.from_pretrained("google/flan-t5-xxl")
     tokens = tokenizer.encode(user_question, return_tensors="pt")
     print("Number of tokens in input:", tokens.size(1))
 
-    # Send the user question to the model
-    print("User's question:", user_question)
+    # Send only the user question to the model
     response = st.session_state.conversation({'question': user_question})
     st.session_state.chat_history = response['chat_history']
 
-    for i, message in enumerate(st.session_state.chat_history):
-        if i % 2 == 0:
-            st.write(user_template.replace(
-                "{{MSG}}", message.content), unsafe_allow_html=True)
-        else:
-            st.write(bot_template.replace(
-                "{{MSG}}", message.content), unsafe_allow_html=True)
+    # Print the user's question
+    print("User's question:", user_question)
 
-
+    # Display the bot's response
+    st.write(bot_template.replace("{{MSG}}", response['answer']), unsafe_allow_html=True)
 
 def main():
     load_dotenv()
