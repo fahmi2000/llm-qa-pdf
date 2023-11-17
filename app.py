@@ -52,7 +52,7 @@ def get_converse_chain(vectorstore):
     return converse_chain
 
 def handle_userinput(user_question):
-    max_token = 1024
+    max_token = 500
     truncated_question = user_question[:max_token]
     response = st.session_state.converse({'question': truncated_question})
     st.write(response)
