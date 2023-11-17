@@ -9,7 +9,7 @@ from langchain.memory import ConversationBufferMemory
 from langchain.chains import ConversationalRetrievalChain
 from htmlTemplates import css, bot_template, user_template
 from langchain.llms import HuggingFaceHub
-from transformers import T5Tokenizer
+from transformers import AutoTokenizer
 
 def get_pdf_text(pdf_docs):
     text = ""
@@ -73,7 +73,7 @@ def get_conversation_chain(vectorstore):
 
 def handle_userinput(user_question):
     # Check the number of tokens in the input text
-    tokenizer = T5Tokenizer.from_pretrained("OpenAssistant/oasst-sft-4-pythia-12b-epoch-3.5")
+    tokenizer = AutoTokenizer.from_pretrained("OpenAssistant/oasst-sft-4-pythia-12b-epoch-3.5")
     tokens = tokenizer.encode(user_question, return_tensors="pt")
     print("Number of tokens in input:", tokens.size(1))
 
