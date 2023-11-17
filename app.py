@@ -8,6 +8,7 @@ from langchain.chains import ConversationalRetrievalChain
 from htmlTemplates import css, bot_template, user_template
 from langchain.chains.conversation.memory import ConversationBufferMemory
 from langchain.llms import HuggingFaceHub
+from langchain.chat_models import ChatOpenAI
 
 
 def get_pdf_text(pdf_docs):
@@ -39,9 +40,8 @@ def get_vectorstore(text_chunks):
     
 def get_converse_chain(vectorstore):
     repo_id = "google/flan-t5-xxl"
-    llm = HuggingFaceHub(
-    repo_id = repo_id, model_kwargs = {"temperature": 0.5, "max_length": 64}
-    )
+    # llm = HuggingFaceHub(repo_id = repo_id, model_kwargs = {"temperature": 0.5, "max_length": 64})
+    llm = ChatOpenAI()
     
     memory = ConversationBufferMemory(memory_key = 'chat_history', return_messages = True)
     converse_chain = ConversationalRetrievalChain.from_llm(
