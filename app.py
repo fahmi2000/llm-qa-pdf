@@ -8,6 +8,8 @@ from langchain.memory import ConversationBufferMemory
 from langchain.chains import ConversationalRetrievalChain
 from htmlTemplates import css, bot_template, user_template
 from langchain.llms import HuggingFaceHub
+from transformers import T5Tokenizer, T5ForConditionalGeneration
+
 
 def get_pdf_text(pdf_docs):
     text = ""
@@ -37,16 +39,23 @@ def get_vectorstore(text_chunks):
 
 
 def get_conversation_chain(vectorstore):
-    # llm = ChatOpenAI()
-    llm = HuggingFaceHub(repo_id="google/flan-t5-large", model_kwargs={"temperature":0.5, "max_length":2000})
-    memory = ConversationBufferMemory(memory_key='chat_history', return_messages = True)
+    # Instantiate the local LLM
+    tokenizer = T5Tokenizer.from_pretrained("google/flan-t5-large")
+    model = T5ForConditionalGeneration.from_pretrained("google/flan-t5-large")
+
+    memory = ConversationBufferMemory(memory_key='chat_history', return_messages=True)
+
+    def local_llm(input_text):
+        input_ids = tokenizer(input_text, return_tensors="pt").input_ids
+        outputs = model.generate(input_ids)
+        return tokenizer.decode(outputs[0])
+
     conversation_chain = ConversationalRetrievalChain.from_llm(
-        llm = llm,
-        retriever = vectorstore.as_retriever(),
-        memory = memory
+        llm=local_llm,
+        retriever=vectorstore.as_retriever(),
+        memory=memory
     )
     return conversation_chain
-
 
 def handle_userinput(user_question):
     response = st.session_state.conversation({'question': user_question})

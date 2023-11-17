@@ -7,3 +7,4 @@ openai
 huggingface-hub
 InstructorEmbedding
 sentence-transformers
+transformers
