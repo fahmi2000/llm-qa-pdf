@@ -2,14 +2,12 @@ import streamlit as st
 from dotenv import load_dotenv
 from PyPDF2 import PdfReader
 from langchain.text_splitter import CharacterTextSplitter
-from langchain.embeddings import OpenAIEmbeddings, HuggingFaceInstructEmbeddings
+from langchain.embeddings import HuggingFaceInstructEmbeddings
 from langchain.vectorstores import FAISS
-from langchain.chat_models import ChatOpenAI
 from langchain.memory import ConversationBufferMemory
 from langchain.chains import ConversationalRetrievalChain
 from htmlTemplates import css, bot_template, user_template
 from langchain.llms import HuggingFaceHub
-from transformers import AutoTokenizer
 
 def get_pdf_text(pdf_docs):
     text = ""
@@ -40,55 +38,28 @@ def get_vectorstore(text_chunks):
 
 def get_conversation_chain(vectorstore):
     # llm = ChatOpenAI()
-    llm = HuggingFaceHub(repo_id="OpenAssistant/oasst-sft-4-pythia-12b-epoch-3.5", model_kwargs={"temperature":0.5, "max_length":2000})
-
-    memory = ConversationBufferMemory(
-        memory_key='chat_history', return_messages=True)
+    llm = HuggingFaceHub(repo_id="google/flan-t5-large", model_kwargs={"temperature":0.5, "max_length":2000})
+    memory = ConversationBufferMemory(memory_key='chat_history', return_messages = True)
     conversation_chain = ConversationalRetrievalChain.from_llm(
-        llm=llm,
-        retriever=vectorstore.as_retriever(),
-        memory=memory
+        llm = llm,
+        retriever = vectorstore.as_retriever(),
+        memory = memory
     )
     return conversation_chain
 
 
-# def handle_userinput(user_question):
-#     # Check the number of tokens in the input text
-#     tokenizer = T5Tokenizer.from_pretrained("google/flan-t5-xxl")
-#     tokens = tokenizer.encode(user_question, return_tensors="pt")
-#     print("Number of tokens in input:", tokens.size(1))
-
-#     # Send the user question to the model
-#     print("User's question:", user_question)
-#     response = st.session_state.conversation({'question': user_question})
-#     st.session_state.chat_history = response['chat_history']
-
-#     for i, message in enumerate(st.session_state.chat_history):
-#         if i % 2 == 0:
-#             st.write(user_template.replace(
-#                 "{{MSG}}", message.content), unsafe_allow_html=True)
-#         else:
-#             st.write(bot_template.replace(
-#                 "{{MSG}}", message.content), unsafe_allow_html=True)
-
 def handle_userinput(user_question):
-    # Check the number of tokens in the input text
-    tokenizer = AutoTokenizer.from_pretrained("OpenAssistant/oasst-sft-4-pythia-12b-epoch-3.5")
-    tokens = tokenizer.encode(user_question, return_tensors="pt")
-    print("Number of tokens in input:", tokens.size(1))
-
-    # Send only the user question to the model
     response = st.session_state.conversation({'question': user_question})
     st.session_state.chat_history = response['chat_history']
-    
 
-    # Print the user's question
-    print("User's question:", user_question)
-    print("Length of conversation history:", len(st.session_state.chat_history))
+    for i, message in enumerate(st.session_state.chat_history):
+        if i % 2 == 0:
+            st.write(user_template.replace(
+                "{{MSG}}", message.content), unsafe_allow_html=True)
+        else:
+            st.write(bot_template.replace(
+                "{{MSG}}", message.content), unsafe_allow_html=True)
 
-
-    # Display the bot's response
-    st.write(bot_template.replace("{{MSG}}", response['answer']), unsafe_allow_html=True)
 
 def main():
     load_dotenv()
