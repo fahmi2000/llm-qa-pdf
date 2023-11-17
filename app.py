@@ -39,7 +39,7 @@ def get_vectorstore(text_chunks):
 
 def get_conversation_chain(vectorstore):
     # llm = ChatOpenAI()
-    llm = HuggingFaceHub(repo_id="google/flan-t5-xxl", model_kwargs={"temperature":0.5, "max_length":2000})
+    llm = HuggingFaceHub(repo_id="OpenAssistant/oasst-sft-4-pythia-12b-epoch-3.5", model_kwargs={"temperature":0.5, "max_length":2000})
 
     memory = ConversationBufferMemory(
         memory_key='chat_history', return_messages=True)
@@ -52,9 +52,10 @@ def get_conversation_chain(vectorstore):
 
 
 def handle_userinput(user_question):
+    # Call the conversation model with only the user's question
     response = st.session_state.conversation({'question': user_question})
-    st.session_state.chat_history = response['chat_history']
 
+    st.session_state.chat_history = response['chat_history']
     for i, message in enumerate(st.session_state.chat_history):
         if i % 2 == 0:
             st.write(user_template.replace(
@@ -62,6 +63,7 @@ def handle_userinput(user_question):
         else:
             st.write(bot_template.replace(
                 "{{MSG}}", message.content), unsafe_allow_html=True)
+
 
 
 def main():
