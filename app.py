@@ -9,6 +9,7 @@ from langchain.memory import ConversationBufferMemory
 from langchain.chains import ConversationalRetrievalChain
 from htmlTemplates import css, bot_template, user_template
 from langchain.llms import HuggingFaceHub
+from transformers import T5Tokenizer
 
 def get_pdf_text(pdf_docs):
     text = ""
@@ -52,10 +53,16 @@ def get_conversation_chain(vectorstore):
 
 
 def handle_userinput(user_question):
-    # Call the conversation model with only the user's question
-    response = st.session_state.conversation({'question': user_question})
+    # Check the number of tokens in the input text
+    tokenizer = T5Tokenizer.from_pretrained("google/flan-t5-xxl")
+    tokens = tokenizer.encode(user_question, return_tensors="pt")
+    print("Number of tokens in input:", tokens.size(1))
 
+    # Send the user question to the model
+    print("User's question:", user_question)
+    response = st.session_state.conversation({'question': user_question})
     st.session_state.chat_history = response['chat_history']
+
     for i, message in enumerate(st.session_state.chat_history):
         if i % 2 == 0:
             st.write(user_template.replace(
