@@ -80,9 +80,12 @@ def handle_userinput(user_question):
     # Send only the user question to the model
     response = st.session_state.conversation({'question': user_question})
     st.session_state.chat_history = response['chat_history']
+    
 
     # Print the user's question
     print("User's question:", user_question)
+    print("Length of conversation history:", len(st.session_state.chat_history))
+
 
     # Display the bot's response
     st.write(bot_template.replace("{{MSG}}", response['answer']), unsafe_allow_html=True)
