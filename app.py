@@ -40,8 +40,8 @@ def get_vectorstore(text_chunks):
     
 def get_converse_chain(vectorstore):
     repo_id = "google/flan-t5-xxl"
-    # llm = HuggingFaceHub(repo_id = repo_id, model_kwargs = {"temperature": 0.5, "max_length": 64})
-    llm = ChatOpenAI()
+    llm = HuggingFaceHub(repo_id = repo_id, model_kwargs = {"temperature": 0.5, "max_length": 64})
+    # llm = ChatOpenAI()
     
     memory = ConversationBufferMemory(memory_key = 'chat_history', return_messages = True)
     converse_chain = ConversationalRetrievalChain.from_llm(
@@ -51,11 +51,10 @@ def get_converse_chain(vectorstore):
     )
     return converse_chain
 
-def handle_userinput(user_question):
-    max_token = 500
-    truncated_question = user_question[:max_token]
-    response = st.session_state.converse({'question': truncated_question})
+def handle_userinput():
+    response = st.session_state.converse({'question': ''})
     st.write(response)
+
 
 def main():
     load_dotenv()
