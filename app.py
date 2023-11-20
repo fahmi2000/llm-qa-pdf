@@ -69,12 +69,12 @@ def main():
             st.write("New embeddings computed.")
         
         query = st.text_input("Ask questions about your document:")
-        # st.write(query)
         
         if query:
+            query = f"<|prompter|>{query}<|endoftext|><|assistant|>"
+            
             docs = VectorStore.similarity_search(query = query, k = 3)
             
-            # llm = OpenAI(model_name = "gpt-3.5-turbo")
             llm = HuggingFaceHub(repo_id="OpenAssistant/oasst-sft-4-pythia-12b-epoch-3.5", model_kwargs={"temperature":0.8, "max_length":512})
             
             chain = load_qa_chain(llm = llm, chain_type = "stuff")
