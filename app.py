@@ -61,30 +61,38 @@ def main():
             embeddings = HuggingFaceInstructEmbeddings(model_name="hkunlp/instructor-xl")
             VectorStore = FAISS.from_texts(chunks, embedding=embeddings)
 
-            # Construct the path to the .pkl file in the 'db' folder
             pkl_path = os.path.join(db_folder, f"{store_name}.pkl")
 
             with open(pkl_path, "wb") as f:
                 pickle.dump(VectorStore, f)
             st.write("New embeddings computed.")
+            
+        select_llm = st.selectbox(
+            'Select a large language model:',
+            ('oasst-sft-4', 'flan-t5-xxl', 'falcon-7b')
+        )
+        
+        if select_llm == 'oasst-sft-4':
+            select_llm = 'OpenAssistant/oasst-sft-4-pythia-12b-epoch-3.5'
+        elif select_llm == 'flan-t5-xxl':
+            select_llm = 'google/flan-t5-xxl'
+        elif select_llm == 'falcon-7b':
+            select_llm = 'tiiuae/falcon-7b-instruct'
+            
+        st.write(select_llm)
         
         query = st.text_input("Ask questions about your document:")
         
         if query:
-            query = f"<|prompter|>{query}<|endoftext|><|assistant|>"
-            
-            docs = VectorStore.similarity_search(query = query, k = 3)
-            
-            llm = HuggingFaceHub(repo_id="OpenAssistant/oasst-sft-4-pythia-12b-epoch-3.5", model_kwargs={"temperature":0.8, "max_length":512})
-            
+            query = f"<|prompter|>{query}<|endoftext|><|assistant|>"          
+            docs = VectorStore.similarity_search(query = query, k = 4)           
+            llm = HuggingFaceHub(repo_id=select_llm, model_kwargs={"temperature":0.3, "max_length":200})
             chain = load_qa_chain(llm = llm, chain_type = "stuff")
-            with get_openai_callback() as cb:
-                response = chain.run(input_documents = docs, question = query)
-                print(cb)
+            response = chain.run(input_documents = docs, question = query)
             
             st.write(response)
-            print(response)     
-            st.write(docs)
+            print(query)
+            print(response)
 
 if __name__ == '__main__':
     main()
