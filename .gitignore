@@ -1,3 +1,4 @@
 .env
 venv/
-db/
+/db/*
+!/db/vector_is_generated_here.txt
