@@ -19,9 +19,9 @@ def get_pdf_text(pdf):
 
 def get_text_chunks(text):
     text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=900,
-        chunk_overlap=200,
-        length_function=len
+        chunk_size = 700,
+        chunk_overlap = 200,
+        length_function = len
     )
     chunks = text_splitter.split_text(text=text)
     return chunks
@@ -52,9 +52,8 @@ def get_conversation_chain(select_llm):
     }
 
     model_id = model_mapping.get(select_llm, select_llm)
-    llm = HuggingFaceHub(repo_id=model_id, model_kwargs={"temperature": 0.3, "max_length": 512})
+    llm = HuggingFaceHub(repo_id=model_id, model_kwargs={"temperature": 0.3, "max_token": 512})
     return load_qa_chain(llm=llm, chain_type="stuff")
-
 
 def handle_user_input(query, VectorStore, select_llm):
     query = f"<|prompter|>{query}<|endoftext|><|assistant|>" 
@@ -64,8 +63,8 @@ def handle_user_input(query, VectorStore, select_llm):
     chain = get_conversation_chain(select_llm)
     response = chain.run(input_documents=docs, question=query)
     
-    print(query)
-    print(response)
+    print("User query:\n", query)
+    print("AI Response:\n", response)
     
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
