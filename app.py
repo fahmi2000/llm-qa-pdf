@@ -85,10 +85,10 @@ def main():
             ('oasst-sft-4', 'flan-t5-xxl', 'falcon-7b')
         )
 
-        query = st.chat_input("Ask questions about your document...")
+    query = st.chat_input("Ask questions about your document...")
 
-        if query:
-            handle_user_input(query, VectorStore, select_llm)
+    if query:
+        handle_user_input(query, VectorStore, select_llm)
 
 if __name__ == '__main__':
     main()
