@@ -57,26 +57,26 @@ def get_conversation_chain(select_llm):
 
 def handle_user_input(query, VectorStore, select_llm):
     query = f"<|prompter|>{query}<|endoftext|><|assistant|>" 
+    
     docs = VectorStore.similarity_search(query=query, k=4)
+    total_tokens = sum(len(doc) for doc in docs)
+    print("Total tokens in input documents:", total_tokens)
+    
     chain = get_conversation_chain(select_llm)
     response = chain.run(input_documents=docs, question=query)
     
     print(query)
     print(response)
     
-    # Display assistant response in chat message container
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
         full_response = ""
         assistant_response = response
-        # Simulate stream of response with milliseconds delay
         for chunk in assistant_response.split():
             full_response += chunk + " "
             time.sleep(0.05)
-            # Add a blinking cursor to simulate typing
             message_placeholder.markdown(full_response + "▌")
         message_placeholder.markdown(full_response)
-    # Add assistant response to chat history
     st.session_state.messages.append({"role": "assistant", "content": full_response})
 
 def main():
