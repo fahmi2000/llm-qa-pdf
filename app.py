@@ -59,8 +59,6 @@ def handle_user_input(query, VectorStore, select_llm):
     query = f"<|prompter|>{query}<|endoftext|><|assistant|>" 
     
     docs = VectorStore.similarity_search(query=query, k=4)
-    total_tokens = sum(len(doc) for doc in docs)
-    print("Total tokens in input documents:", total_tokens)
     
     chain = get_conversation_chain(select_llm)
     response = chain.run(input_documents=docs, question=query)
