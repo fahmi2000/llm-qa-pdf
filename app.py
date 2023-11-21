@@ -93,18 +93,14 @@ def main():
             st.markdown(message["content"])
 
     # Accept user input
-    if prompt := st.chat_input("What is up?"):
+    if query := st.chat_input("What is up?"):
         # Display user message in chat message container
         with st.chat_message("user"):
-            st.markdown(prompt)
+            st.markdown(query)
         # Add user message to chat history
-        st.session_state.messages.append({"role": "user", "content": prompt})
-    
-    
-    query = st.chat_input("Ask questions about your document...")
-
-    if query:
-        handle_user_input(query, VectorStore, select_llm)
+        st.session_state.messages.append({"role": "user", "content": query})
+        
+        handle_user_input(query, VectorStore, select_llm)        
 
 if __name__ == '__main__':
     main()
