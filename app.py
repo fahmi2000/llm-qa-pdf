@@ -42,7 +42,7 @@ def main():
             if os.path.exists(pkl_path):
                 with open(pkl_path, "rb") as f:
                     VectorStore = pickle.load(f)
-                st.write('Embeddings loaded locally.')
+                st.caption('Embeddings loaded locally.')
             else:
                 embeddings = HuggingFaceInstructEmbeddings(model_name="hkunlp/instructor-xl")
                 VectorStore = FAISS.from_texts(chunks, embedding=embeddings)
@@ -51,7 +51,7 @@ def main():
 
                 with open(pkl_path, "wb") as f:
                     pickle.dump(VectorStore, f)
-                st.write("New embeddings computed.")
+                st.caption("New embeddings computed.")
     
         select_llm = st.selectbox(
             'Select a large language model:',
