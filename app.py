@@ -45,15 +45,16 @@ def get_vectorstore(chunks, pdf_name):
     return VectorStore
 
 def get_conversation_chain(select_llm):
-    if select_llm == 'oasst-sft-4':
-        select_llm = 'OpenAssistant/oasst-sft-4-pythia-12b-epoch-3.5'
-    elif select_llm == 'flan-t5-xxl':
-        select_llm = 'google/flan-t5-xxl'
-    elif select_llm == 'falcon-7b':
-        select_llm = 'tiiuae/falcon-7b-instruct'
+    model_mapping = {
+        'oasst-sft-4': 'OpenAssistant/oasst-sft-4-pythia-12b-epoch-3.5',
+        'flan-t5-xxl': 'google/flan-t5-xxl',
+        'falcon-7b': 'tiiuae/falcon-7b-instruct'
+    }
 
-    llm = HuggingFaceHub(repo_id=select_llm, model_kwargs={"temperature": 0.3, "max_length": 200})
+    model_id = model_mapping.get(select_llm, select_llm)
+    llm = HuggingFaceHub(repo_id=model_id, model_kwargs={"temperature": 0.3, "max_length": 512})
     return load_qa_chain(llm=llm, chain_type="stuff")
+
 
 def handle_user_input(query, VectorStore, select_llm):
     query = f"<|prompter|>{query}<|endoftext|><|assistant|>" 
