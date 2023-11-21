@@ -8,7 +8,6 @@ from langchain.embeddings import HuggingFaceInstructEmbeddings
 from langchain.vectorstores import FAISS
 from langchain.llms import HuggingFaceHub
 from langchain.chains.question_answering import load_qa_chain
-from langchain.callbacks import get_openai_callback
 import os
 
 with st.sidebar:
@@ -24,14 +23,12 @@ with st.sidebar:
     
     add_vertical_space(5)
     st.write('Made agonizingly by me....')    
-    
-
+                    
 def main():
-    st.write("Hello")
-    
     load_dotenv()
     
-    pdf = st.file_uploader("Upload your PDF", type='pdf')
+    with st.sidebar:
+        pdf = st.file_uploader("Upload your PDF", type='pdf')
     
     if pdf is not None:
         pdf_reader = PdfReader(pdf)
