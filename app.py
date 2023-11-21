@@ -1,3 +1,4 @@
+import time
 import streamlit as st
 from dotenv import load_dotenv
 import pickle
@@ -55,17 +56,28 @@ def get_conversation_chain(select_llm):
     return load_qa_chain(llm=llm, chain_type="stuff")
 
 def handle_user_input(query, VectorStore, select_llm):
-    with st.chat_message("user"):
-        st.write(query)
     query = f"<|prompter|>{query}<|endoftext|><|assistant|>" 
     docs = VectorStore.similarity_search(query=query, k=4)
     chain = get_conversation_chain(select_llm)
     response = chain.run(input_documents=docs, question=query)
-
-    with st.chat_message("ai"):
-        st.write(response)
+    
     print(query)
     print(response)
+    
+    # Display assistant response in chat message container
+    with st.chat_message("assistant"):
+        message_placeholder = st.empty()
+        full_response = ""
+        assistant_response = response
+        # Simulate stream of response with milliseconds delay
+        for chunk in assistant_response.split():
+            full_response += chunk + " "
+            time.sleep(0.05)
+            # Add a blinking cursor to simulate typing
+            message_placeholder.markdown(full_response + "▌")
+        message_placeholder.markdown(full_response)
+    # Add assistant response to chat history
+    st.session_state.messages.append({"role": "assistant", "content": full_response})
 
 def main():
     load_dotenv()
@@ -87,17 +99,13 @@ def main():
     if "messages" not in st.session_state:
         st.session_state.messages = []
 
-    # Display chat messages from history on app rerun
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
-    # Accept user input
     if query := st.chat_input("What is up?"):
-        # Display user message in chat message container
         with st.chat_message("user"):
             st.markdown(query)
-        # Add user message to chat history
         st.session_state.messages.append({"role": "user", "content": query})
         
         handle_user_input(query, VectorStore, select_llm)        

@@ -1,38 +1,51 @@
-max_seq_length  512
-C:\Users\Aliff Fahmi\Documents\GitHub\Local-LLM-and-OpenAI-PDF-QA\venv\Lib\site-packages\huggingface_hub\utils\_deprecation.py:127: FutureWarning: '__init__' (from 'huggingface_hub.inference_api') is deprecated and will be removed from version '0.19.0'. `InferenceApi` client is deprecated in favor of the more feature-complete `InferenceClient`. Check out this guide to learn how to convert your script to use it: https://huggingface.co/docs/huggingface_hub/guides/inference#legacy-inferenceapi-client.
-  warnings.warn(warning_message, FutureWarning)
-Downloading (…)okenizer_config.json: 100%|████████████████████████████████████████████████████████| 444/444 [00:00<?, ?B/s]
-C:\Users\Aliff Fahmi\Documents\GitHub\Local-LLM-and-OpenAI-PDF-QA\venv\Lib\site-packages\huggingface_hub\file_download.py:137: UserWarning: `huggingface_hub` cache-system uses symlinks by default to efficiently store duplicated files but your machine does not support them in C:\Users\Aliff Fahmi\.cache\huggingface\hub. Caching files will still work but in a degraded version that might require more space on your disk. This warning can be disabled by setting the `HF_HUB_DISABLE_SYMLINKS_WARNING` environment variable. For more details, see https://huggingface.co/docs/huggingface_hub/how-to-cache#limitations.        
-To support symlinks on Windows, you either need to activate Developer Mode or to run Python as an administrator. In order to see activate developer mode, see this article: https://docs.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development
-  warnings.warn(message)
-Downloading (…)cial_tokens_map.json: 100%|████████████████████████████████████████████████████████| 303/303 [00:00<?, ?B/s]
-Downloading (…)/main/tokenizer.json: 100%|████████████████████████████████████████████| 2.11M/2.11M [00:01<00:00, 1.57MB/s]
-The tokenizer class you load from this checkpoint is not the same type as the class this function is called from. It may result in unexpected tokenization.
-The tokenizer class you load from this checkpoint is 'GPTNeoXTokenizer'.
-The class this function is called from is 'T5Tokenizer'.
-2023-11-17 12:01:01.915 Uncaught app exception
-Traceback (most recent call last):
-  File "C:\Users\Aliff Fahmi\Documents\GitHub\Local-LLM-and-OpenAI-PDF-QA\venv\Lib\site-packages\streamlit\runtime\scriptrunner\script_runner.py", line 534, in _run_script
+ValueError: Error raised by inference API: Input validation error: `inputs` must have less than 1024 tokens. Given: 1073
+Traceback:
+File "C:\Users\Aliff Fahmi\Documents\GitHub\Local-LLM-and-OpenAI-PDF-QA\venv\Lib\site-packages\streamlit\runtime\scriptrunner\script_runner.py", line 534, in _run_script
     exec(code, module.__dict__)
-  File "C:\Users\Aliff Fahmi\Documents\GitHub\Local-LLM-and-OpenAI-PDF-QA\app.py", line 130, in <module>
+File "C:\Users\Aliff Fahmi\Documents\GitHub\Local-LLM-and-OpenAI-PDF-QA\app.py", line 114, in <module>
     main()
-  File "C:\Users\Aliff Fahmi\Documents\GitHub\Local-LLM-and-OpenAI-PDF-QA\app.py", line 107, in main
-    handle_userinput(user_question)
-  File "C:\Users\Aliff Fahmi\Documents\GitHub\Local-LLM-and-OpenAI-PDF-QA\app.py", line 76, in handle_userinput
-    tokenizer = T5Tokenizer.from_pretrained("OpenAssistant/oasst-sft-4-pythia-12b-epoch-3.5")
-                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\Aliff Fahmi\Documents\GitHub\Local-LLM-and-OpenAI-PDF-QA\venv\Lib\site-packages\transformers\tokenization_utils_base.py", line 2024, in from_pretrained
-    return cls._from_pretrained(
-           ^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\Aliff Fahmi\Documents\GitHub\Local-LLM-and-OpenAI-PDF-QA\venv\Lib\site-packages\transformers\tokenization_utils_base.py", line 2256, in _from_pretrained
-    tokenizer = cls(*init_inputs, **init_kwargs)
-                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\Aliff Fahmi\Documents\GitHub\Local-LLM-and-OpenAI-PDF-QA\venv\Lib\site-packages\transformers\models\t5\tokenization_t5.py", line 166, in __init__
-    self.sp_model.Load(vocab_file)
-  File "C:\Users\Aliff Fahmi\Documents\GitHub\Local-LLM-and-OpenAI-PDF-QA\venv\Lib\site-packages\sentencepiece\__init__.py", line 905, in Load
-    return self.LoadFromFile(model_file)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\Aliff Fahmi\Documents\GitHub\Local-LLM-and-OpenAI-PDF-QA\venv\Lib\site-packages\sentencepiece\__init__.py", line 310, in LoadFromFile
-    return _sentencepiece.SentencePieceProcessor_LoadFromFile(self, arg)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-TypeError: not a string
+File "C:\Users\Aliff Fahmi\Documents\GitHub\Local-LLM-and-OpenAI-PDF-QA\app.py", line 111, in main
+    handle_user_input(query, VectorStore, select_llm)
+File "C:\Users\Aliff Fahmi\Documents\GitHub\Local-LLM-and-OpenAI-PDF-QA\app.py", line 62, in handle_user_input
+    response = chain.run(input_documents=docs, question=query)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+File "C:\Users\Aliff Fahmi\Documents\GitHub\Local-LLM-and-OpenAI-PDF-QA\venv\Lib\site-packages\langchain\chains\base.py", line 510, in run
+    return self(kwargs, callbacks=callbacks, tags=tags, metadata=metadata)[
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+File "C:\Users\Aliff Fahmi\Documents\GitHub\Local-LLM-and-OpenAI-PDF-QA\venv\Lib\site-packages\langchain\chains\base.py", line 310, in __call__
+    raise e
+File "C:\Users\Aliff Fahmi\Documents\GitHub\Local-LLM-and-OpenAI-PDF-QA\venv\Lib\site-packages\langchain\chains\base.py", line 304, in __call__
+    self._call(inputs, run_manager=run_manager)
+File "C:\Users\Aliff Fahmi\Documents\GitHub\Local-LLM-and-OpenAI-PDF-QA\venv\Lib\site-packages\langchain\chains\combine_documents\base.py", line 122, in _call
+    output, extra_return_dict = self.combine_docs(
+                                ^^^^^^^^^^^^^^^^^^
+File "C:\Users\Aliff Fahmi\Documents\GitHub\Local-LLM-and-OpenAI-PDF-QA\venv\Lib\site-packages\langchain\chains\combine_documents\stuff.py", line 171, in combine_docs
+    return self.llm_chain.predict(callbacks=callbacks, **inputs), {}
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+File "C:\Users\Aliff Fahmi\Documents\GitHub\Local-LLM-and-OpenAI-PDF-QA\venv\Lib\site-packages\langchain\chains\llm.py", line 298, in predict
+    return self(kwargs, callbacks=callbacks)[self.output_key]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+File "C:\Users\Aliff Fahmi\Documents\GitHub\Local-LLM-and-OpenAI-PDF-QA\venv\Lib\site-packages\langchain\chains\base.py", line 310, in __call__
+    raise e
+File "C:\Users\Aliff Fahmi\Documents\GitHub\Local-LLM-and-OpenAI-PDF-QA\venv\Lib\site-packages\langchain\chains\base.py", line 304, in __call__
+    self._call(inputs, run_manager=run_manager)
+File "C:\Users\Aliff Fahmi\Documents\GitHub\Local-LLM-and-OpenAI-PDF-QA\venv\Lib\site-packages\langchain\chains\llm.py", line 108, in _call
+    response = self.generate([inputs], run_manager=run_manager)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+File "C:\Users\Aliff Fahmi\Documents\GitHub\Local-LLM-and-OpenAI-PDF-QA\venv\Lib\site-packages\langchain\chains\llm.py", line 120, in generate
+    return self.llm.generate_prompt(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+File "C:\Users\Aliff Fahmi\Documents\GitHub\Local-LLM-and-OpenAI-PDF-QA\venv\Lib\site-packages\langchain\llms\base.py", line 507, in generate_prompt
+    return self.generate(prompt_strings, stop=stop, callbacks=callbacks, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+File "C:\Users\Aliff Fahmi\Documents\GitHub\Local-LLM-and-OpenAI-PDF-QA\venv\Lib\site-packages\langchain\llms\base.py", line 656, in generate
+    output = self._generate_helper(
+             ^^^^^^^^^^^^^^^^^^^^^^
+File "C:\Users\Aliff Fahmi\Documents\GitHub\Local-LLM-and-OpenAI-PDF-QA\venv\Lib\site-packages\langchain\llms\base.py", line 544, in _generate_helper
+    raise e
+File "C:\Users\Aliff Fahmi\Documents\GitHub\Local-LLM-and-OpenAI-PDF-QA\venv\Lib\site-packages\langchain\llms\base.py", line 531, in _generate_helper
+    self._generate(
+File "C:\Users\Aliff Fahmi\Documents\GitHub\Local-LLM-and-OpenAI-PDF-QA\venv\Lib\site-packages\langchain\llms\base.py", line 1053, in _generate
+    self._call(prompt, stop=stop, run_manager=run_manager, **kwargs)
+File "C:\Users\Aliff Fahmi\Documents\GitHub\Local-LLM-and-OpenAI-PDF-QA\venv\Lib\site-packages\langchain\llms\huggingface_hub.py", line 112, in _call
+    raise ValueError(f"Error raised by inference API: {response['error']}")
