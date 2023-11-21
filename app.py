@@ -58,7 +58,7 @@ def get_conversation_chain(select_llm):
 def handle_user_input(query, VectorStore, select_llm):
     with st.chat_message("user"):
         st.write(query)
-    query = f"{query}"
+    query = f"<|prompter|>{query}<|endoftext|><|assistant|>" 
     docs = VectorStore.similarity_search(query=query, k=4)
     chain = get_conversation_chain(select_llm)
     response = chain.run(input_documents=docs, question=query)
