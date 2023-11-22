@@ -49,7 +49,7 @@ def get_conversation_chain(select_llm):
     model_mapping = {
         'oasst-sft-4': 'OpenAssistant/oasst-sft-4-pythia-12b-epoch-3.5',
         'flan-t5-xxl': 'google/flan-t5-xxl',
-        'StableBeluga2': 'stabilityai/StableBeluga2'
+        'mistralai/Mistral-7B-v0.1': 'mistralai/Mistral-7B-v0.1'
     }
 
     model_id = model_mapping.get(select_llm, select_llm)
@@ -101,7 +101,7 @@ def main():
 
         select_llm = st.selectbox(
             'Select a large language model:',
-            ('oasst-sft-4', 'flan-t5-xxl', 'StableBeluga2')
+            ('oasst-sft-4', 'flan-t5-xxl', 'mistralai/Mistral-7B-v0.1')
         )
 
     if "messages" not in st.session_state:
