@@ -68,9 +68,13 @@ def handle_user_input(query, VectorStore, select_llm):
         future_vector_search = exe.submit(VectorStore.similarity_search, query = query, k=3)
         docs = future_vector_search.result()
         future_response = exe.submit(chain.run, input_documents = docs, question = query)
+        
+    start_time_search_response = time.time()
+    response = future_response.result() 
+    end_time_search_response = time.time()
+    st.write("API response time: ", end_time_search_response - start_time_search_response)   
     
-    response = future_response.result()    
-    
+    start_time_ai_text = time.time()
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
         full_response = ""
@@ -80,6 +84,8 @@ def handle_user_input(query, VectorStore, select_llm):
             time.sleep(0.05)
             message_placeholder.markdown(full_response + "▌")
         message_placeholder.markdown(full_response)
+    end_time_ai_text = time.time()
+    st.write("AI text output time: ", end_time_ai_text - start_time_ai_text)
     st.session_state.messages.append({"role": "assistant", "content": full_response})
 
 def main():
