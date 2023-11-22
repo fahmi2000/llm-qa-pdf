@@ -17,7 +17,7 @@ def timing_decorator(func):
         result = func(*args, **kwargs)
         end_time = time.time()
         execution_time = end_time - start_time
-        print(f"{func.__name__} took {execution_time} seconds")
+        print(f"{func.__name__}: {execution_time} seconds")
         return result
     return wrapper
 
@@ -44,23 +44,25 @@ def get_vectorstore(chunks, pdf_name):
     db_folder = 'db'
     pkl_path = os.path.join(db_folder, f"{pdf_name}.pkl")
 
-    if os.path.exists(pkl_path):
-        with open(pkl_path, "rb") as f:
-            VectorStore = pickle.load(f)
-        st.caption('Embeddings loaded locally.')
-    else:
-        embeddings = HuggingFaceInstructEmbeddings(model_name="hkunlp/instructor-xl")
-        VectorStore = FAISS.from_texts(chunks, embedding = embeddings)
+    with st.status("Processing document...") as status:
+        st.caption("Searching for existing embeddings...")
+        if os.path.exists(pkl_path):
+            with open(pkl_path, "rb") as f:
+                VectorStore = pickle.load(f)
+            status.update(label="Embeddings loaded!", state="complete", expanded=False)
+        else:
+            st.caption("Computing new data...")
+            embeddings = HuggingFaceInstructEmbeddings(model_name="hkunlp/instructor-xl")
+            VectorStore = FAISS.from_texts(chunks, embedding = embeddings)
 
-        with open(pkl_path, "wb") as f:
-            pickle.dump(VectorStore, f)
-        st.caption("New embeddings computed.")
+            with open(pkl_path, "wb") as f:
+                pickle.dump(VectorStore, f)
+            status.update(label="New embeddings computed!", state="complete", expanded=False)
 
     return VectorStore
 
 @timing_decorator
 def get_conversation_chain(select_llm):
-    start_time_select_llm = time.time()
     model_mapping = {
         'oasst-sft-4': 'OpenAssistant/oasst-sft-4-pythia-12b-epoch-3.5',
         'flan-t5-xxl': 'google/flan-t5-xxl',
@@ -69,8 +71,6 @@ def get_conversation_chain(select_llm):
 
     model_id = model_mapping.get(select_llm, select_llm)
     llm = HuggingFaceHub(repo_id=model_id, model_kwargs={"temperature": 0.3, "max_token": 512})
-    end_time_select_llm = time.time()
-    st.write("LLM select response time:", end_time_select_llm - start_time_select_llm)
     return load_qa_chain(llm=llm, chain_type="stuff")
 
 @timing_decorator
@@ -97,6 +97,7 @@ def display_response(response):
             message_placeholder.markdown(full_response)
     st.session_state.messages.append({"role": "assistant", "content": full_response})
 
+@timing_decorator
 def main():
     load_dotenv()
 
