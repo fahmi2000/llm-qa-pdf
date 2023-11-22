@@ -8,6 +8,7 @@ from langchain.embeddings import HuggingFaceInstructEmbeddings
 from langchain.vectorstores import FAISS
 from langchain.llms import HuggingFaceHub
 from langchain.chains.question_answering import load_qa_chain
+import concurrent.futures
 import os
 
 def get_pdf_text(pdf):
@@ -61,20 +62,14 @@ def get_conversation_chain(select_llm):
 def handle_user_input(query, VectorStore, select_llm):
     query = f"<|prompter|>{query}<|endoftext|><|assistant|>" 
     
-    start_time_vector_search = time.time()
-    docs = VectorStore.similarity_search(query=query, k=3)
-    end_time_vector_search = time.time()
-    st.write("Vector search time:", end_time_vector_search - start_time_vector_search)
-    
     chain = get_conversation_chain(select_llm)
     
-    start_time_api_response = time.time()
-    response = chain.run(input_documents=docs, question=query)
-    end_time_api_response = time.time()
-    st.write("API response time:", end_time_api_response - start_time_api_response)
-    st.write(docs)
-    # print(query)
-    # print(response)
+    with concurrent.futures.ThreadPoolExecutor() as exe:
+        future_vector_search = exe.submit(VectorStore.similarity_search, query = query, k=3)
+        docs = future_vector_search.result()
+        future_response = exe.submit(chain.run, input_documents = docs, question = query)
+    
+    response = future_response.result()    
     
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
