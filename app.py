@@ -36,7 +36,7 @@ def get_vectorstore(chunks, pdf_name):
         st.caption('Embeddings loaded locally.')
     else:
         embeddings = HuggingFaceInstructEmbeddings(model_name="hkunlp/instructor-xl")
-        VectorStore = FAISS.from_texts(chunks, embedding=embeddings)
+        VectorStore = FAISS.from_texts(chunks, embedding = embeddings)
 
         with open(pkl_path, "wb") as f:
             pickle.dump(VectorStore, f)
@@ -59,10 +59,10 @@ def get_conversation_chain(select_llm):
     return load_qa_chain(llm=llm, chain_type="stuff")
 
 def handle_user_input(query, VectorStore, select_llm):
-    query = f"<|prompter|> Limit your scope to the document included.{query}<|endoftext|><|assistant|>" 
+    query = f"<|prompter|>{query}<|endoftext|><|assistant|>" 
     
     start_time_vector_search = time.time()
-    docs = VectorStore.similarity_search(query=query, k=2)
+    docs = VectorStore.similarity_search(query=query, k=3)
     end_time_vector_search = time.time()
     st.write("Vector search time:", end_time_vector_search - start_time_vector_search)
     
@@ -72,7 +72,7 @@ def handle_user_input(query, VectorStore, select_llm):
     response = chain.run(input_documents=docs, question=query)
     end_time_api_response = time.time()
     st.write("API response time:", end_time_api_response - start_time_api_response)
-    
+    st.write(docs)
     # print(query)
     # print(response)
     
