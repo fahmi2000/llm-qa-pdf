@@ -11,6 +11,7 @@ from langchain.chains.question_answering import load_qa_chain
 import concurrent.futures
 import os
 
+TIMING_ENABLE = False
 def timing_decorator(func):
     def wrapper(*args, **kwargs):
         start_time = time.time()
@@ -21,7 +22,6 @@ def timing_decorator(func):
         return result
     return wrapper
 
-@timing_decorator
 def get_pdf_text(pdf):
     pdf_reader = PdfReader(pdf)
     text = ""
@@ -29,7 +29,6 @@ def get_pdf_text(pdf):
         text += page.extract_text()
     return text
 
-@timing_decorator
 def get_text_chunks(text):
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=800,
@@ -39,7 +38,6 @@ def get_text_chunks(text):
     chunks = text_splitter.split_text(text=text)
     return chunks
 
-@timing_decorator
 def get_vectorstore(chunks, pdf_name):
     db_folder = 'db'
     pkl_path = os.path.join(db_folder, f"{pdf_name}.pkl")
@@ -61,7 +59,6 @@ def get_vectorstore(chunks, pdf_name):
 
     return VectorStore
 
-@timing_decorator
 def get_conversation_chain(select_llm):
     model_mapping = {
         'oasst-sft-4': 'OpenAssistant/oasst-sft-4-pythia-12b-epoch-3.5',
@@ -84,7 +81,6 @@ def process_response(query, VectorStore, select_llm):
     
     return future_response.result()
 
-@timing_decorator
 def display_response(response):
     with st.chat_message("assistant"):
             message_placeholder = st.empty()
@@ -97,7 +93,6 @@ def display_response(response):
             message_placeholder.markdown(full_response)
     st.session_state.messages.append({"role": "assistant", "content": full_response})
 
-@timing_decorator
 def main():
     load_dotenv()
 
