@@ -59,33 +59,26 @@ def get_conversation_chain(select_llm):
     st.write("LLM select response time:", end_time_select_llm - start_time_select_llm)
     return load_qa_chain(llm=llm, chain_type="stuff")
 
-def handle_user_input(query, VectorStore, select_llm):
-    query = f"<|prompter|>{query}<|endoftext|><|assistant|>" 
-    
+def process_response(query, VectorStore, select_llm):
     chain = get_conversation_chain(select_llm)
     
     with concurrent.futures.ThreadPoolExecutor() as exe:
-        future_vector_search = exe.submit(VectorStore.similarity_search, query = query, k=3)
+        future_vector_search = exe.submit(VectorStore.similarity_search, query=query, k=3)
         docs = future_vector_search.result()
-        future_response = exe.submit(chain.run, input_documents = docs, question = query)
-        
-    start_time_search_response = time.time()
-    response = future_response.result() 
-    end_time_search_response = time.time()
-    st.write("API response time: ", end_time_search_response - start_time_search_response)   
+        future_response = exe.submit(chain.run, input_documents=docs, question=query)
     
-    start_time_ai_text = time.time()
+    return future_response.result()
+
+def display_response(response):
     with st.chat_message("assistant"):
-        message_placeholder = st.empty()
-        full_response = ""
-        assistant_response = response
-        for chunk in assistant_response.split():
-            full_response += chunk + " "
-            time.sleep(0.05)
-            message_placeholder.markdown(full_response + "▌")
-        message_placeholder.markdown(full_response)
-    end_time_ai_text = time.time()
-    st.write("AI text output time: ", end_time_ai_text - start_time_ai_text)
+            message_placeholder = st.empty()
+            full_response = ""
+            assistant_response = response
+            for chunk in assistant_response.split():
+                full_response += chunk + " "
+                time.sleep(0.05)
+                message_placeholder.markdown(full_response + "▌")
+            message_placeholder.markdown(full_response)
     st.session_state.messages.append({"role": "assistant", "content": full_response})
 
 def main():
@@ -117,7 +110,8 @@ def main():
             st.markdown(query)
         st.session_state.messages.append({"role": "user", "content": query})
         
-        handle_user_input(query, VectorStore, select_llm)        
+        response = process_response(query, VectorStore, select_llm)
+        display_response(response)       
 
 if __name__ == '__main__':
     main()
