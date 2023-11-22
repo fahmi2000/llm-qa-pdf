@@ -55,26 +55,26 @@ def get_conversation_chain(select_llm):
     model_id = model_mapping.get(select_llm, select_llm)
     llm = HuggingFaceHub(repo_id=model_id, model_kwargs={"temperature": 0.3, "max_token": 512})
     end_time_select_llm = time.time()
-    print("LLM select response time:", end_time_select_llm - start_time_select_llm)
+    st.write("LLM select response time:", end_time_select_llm - start_time_select_llm)
     return load_qa_chain(llm=llm, chain_type="stuff")
 
 def handle_user_input(query, VectorStore, select_llm):
-    query = f"<|prompter|>{query}<|endoftext|><|assistant|>" 
+    query = f"<|prompter|> Limit your scope to the document included.{query}<|endoftext|><|assistant|>" 
     
     start_time_vector_search = time.time()
     docs = VectorStore.similarity_search(query=query, k=2)
     end_time_vector_search = time.time()
-    print("Vector search time:", end_time_vector_search - start_time_vector_search)
+    st.write("Vector search time:", end_time_vector_search - start_time_vector_search)
     
     chain = get_conversation_chain(select_llm)
     
     start_time_api_response = time.time()
     response = chain.run(input_documents=docs, question=query)
     end_time_api_response = time.time()
-    print("API response time:", end_time_api_response - start_time_api_response)
+    st.write("API response time:", end_time_api_response - start_time_api_response)
     
-    print(query)
-    print(response)
+    # print(query)
+    # print(response)
     
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
