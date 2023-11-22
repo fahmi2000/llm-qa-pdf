@@ -11,6 +11,17 @@ from langchain.chains.question_answering import load_qa_chain
 import concurrent.futures
 import os
 
+def timing_decorator(func):
+    def wrapper(*args, **kwargs):
+        start_time = time.time()
+        result = func(*args, **kwargs)
+        end_time = time.time()
+        execution_time = end_time - start_time
+        print(f"{func.__name__} took {execution_time} seconds")
+        return result
+    return wrapper
+
+@timing_decorator
 def get_pdf_text(pdf):
     pdf_reader = PdfReader(pdf)
     text = ""
@@ -18,6 +29,7 @@ def get_pdf_text(pdf):
         text += page.extract_text()
     return text
 
+@timing_decorator
 def get_text_chunks(text):
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=800,
@@ -27,6 +39,7 @@ def get_text_chunks(text):
     chunks = text_splitter.split_text(text=text)
     return chunks
 
+@timing_decorator
 def get_vectorstore(chunks, pdf_name):
     db_folder = 'db'
     pkl_path = os.path.join(db_folder, f"{pdf_name}.pkl")
@@ -45,6 +58,7 @@ def get_vectorstore(chunks, pdf_name):
 
     return VectorStore
 
+@timing_decorator
 def get_conversation_chain(select_llm):
     start_time_select_llm = time.time()
     model_mapping = {
@@ -59,6 +73,7 @@ def get_conversation_chain(select_llm):
     st.write("LLM select response time:", end_time_select_llm - start_time_select_llm)
     return load_qa_chain(llm=llm, chain_type="stuff")
 
+@timing_decorator
 def process_response(query, VectorStore, select_llm):
     chain = get_conversation_chain(select_llm)
     
@@ -69,6 +84,7 @@ def process_response(query, VectorStore, select_llm):
     
     return future_response.result()
 
+@timing_decorator
 def display_response(response):
     with st.chat_message("assistant"):
             message_placeholder = st.empty()
