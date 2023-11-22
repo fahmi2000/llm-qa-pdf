@@ -73,7 +73,7 @@ def get_conversation_chain(select_llm):
 @timing_decorator
 def process_response(query, VectorStore, select_llm):
     chain = get_conversation_chain(select_llm)
-    
+    query = f"<|prompter|>According to this document, {query}<|endoftext|><|assistant|>"
     with concurrent.futures.ThreadPoolExecutor() as exe:
         future_vector_search = exe.submit(VectorStore.similarity_search, query=query, k=3)
         docs = future_vector_search.result()
@@ -123,7 +123,10 @@ def main():
         st.session_state.messages.append({"role": "user", "content": query})
         
         response = process_response(query, VectorStore, select_llm)
-        display_response(response)       
+        display_response(response)
+        
+        st.cache_data.clear()
+        st.cache_resource.clear()
 
 if __name__ == '__main__':
     main()
