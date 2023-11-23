@@ -11,16 +11,16 @@ from langchain.chains.question_answering import load_qa_chain
 import concurrent.futures
 import os
 
-TIMING_ENABLE = False
-def timing_decorator(func):
-    def wrapper(*args, **kwargs):
-        start_time = time.time()
-        result = func(*args, **kwargs)
-        end_time = time.time()
-        execution_time = end_time - start_time
-        print(f"{func.__name__}: {execution_time} seconds")
-        return result
-    return wrapper
+# TIMING_ENABLE = False
+# def timing_decorator(func):
+#     def wrapper(*args, **kwargs):
+#         start_time = time.time()
+#         result = func(*args, **kwargs)
+#         end_time = time.time()
+#         execution_time = end_time - start_time
+#         print(f"{func.__name__}: {execution_time} seconds")
+#         return result
+#     return wrapper
 
 def get_pdf_text(pdf):
     pdf_reader = PdfReader(pdf)
@@ -70,10 +70,10 @@ def get_conversation_chain(select_llm):
     llm = HuggingFaceHub(repo_id=model_id, model_kwargs={"temperature": 0.3, "max_token": 512})
     return load_qa_chain(llm=llm, chain_type="stuff")
 
-@timing_decorator
+# @timing_decorator
 def process_response(query, VectorStore, select_llm):
     chain = get_conversation_chain(select_llm)
-    query = f"<|prompter|>According to this document, {query}<|endoftext|><|assistant|>"
+    query = f"<|prompter|>Please limit your responses to this document. Otherwise, you can say you do not know. According to this document, {query}<|endoftext|><|assistant|>"
     with concurrent.futures.ThreadPoolExecutor() as exe:
         future_vector_search = exe.submit(VectorStore.similarity_search, query=query, k=3)
         docs = future_vector_search.result()
