@@ -11,16 +11,16 @@ from langchain.chains.question_answering import load_qa_chain
 import concurrent.futures
 import os
 
-# TIMING_ENABLE = False
-# def timing_decorator(func):
-#     def wrapper(*args, **kwargs):
-#         start_time = time.time()
-#         result = func(*args, **kwargs)
-#         end_time = time.time()
-#         execution_time = end_time - start_time
-#         print(f"{func.__name__}: {execution_time} seconds")
-#         return result
-#     return wrapper
+TIMING_ENABLE = False
+def timing_decorator(func):
+    def wrapper(*args, **kwargs):
+        start_time = time.time()
+        result = func(*args, **kwargs)
+        end_time = time.time()
+        execution_time = end_time - start_time
+        print(f"{func.__name__}: {execution_time} seconds")
+        return result
+    return wrapper
 
 def get_pdf_text(pdf):
     pdf_reader = PdfReader(pdf)
@@ -63,7 +63,7 @@ def get_conversation_chain(select_llm):
     model_mapping = {
         'oasst-sft-4': 'OpenAssistant/oasst-sft-4-pythia-12b-epoch-3.5',
         'flan-t5-xxl': 'google/flan-t5-xxl',
-        'flan-ul2': 'google/flan-ul2'
+        'flan-t5-small': 'google/flan-t5-small'
     }
 
     model_id = model_mapping.get(select_llm, select_llm)
