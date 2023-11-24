@@ -1,112 +1,93 @@
-import time
-import streamlit as st
-from dotenv import load_dotenv
-import pickle
-from PyPDF2 import PdfReader
+import fitz as pymupdf
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.embeddings import HuggingFaceInstructEmbeddings
-from langchain.vectorstores import FAISS
-from langchain.llms import HuggingFaceHub
+from langchain.llms import HugggingFaceHub
 from langchain.chains.question_answering import load_qa_chain
 import os
+from langchain.embeddings import HuggingFaceInstructEmbeddings
+from langchain.vectorstores import FAISS
+import pickle
 
-def get_pdf_text(pdf):
-    pdf_reader = PdfReader(pdf)
+# Load the pdf file and assigned the texts into a variable
+def get_pdf_text():
+    doc = pymupdf.open("klia.pdf")
     text = ""
-    for page in pdf_reader.pages:
+    for page in doc.pages:
         text += page.extract_text()
     return text
 
-def get_text_chunks(text):
+# Get the text variable and split it into sizes
+def get_text_chunks():
     text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size = 700,
-        chunk_overlap = 200,
-        length_function = len
+        chunk_size = 800,
+        chunk_overlap = 100,
+        length_function = len,
+        separators = "\n"
     )
-    chunks = text_splitter.split_text(text=text)
+    chunks = text_splitter.split_text(text = text)
     return chunks
-
-def get_vectorstore(chunks, pdf_name):
-    db_folder = 'db'
-    pkl_path = os.path.join(db_folder, f"{pdf_name}.pkl")
-
+    
+def get_converse_chain():
+    llm = HugggingFaceHub(
+        repo_id = "HuggingFaceH4/zephyr-7b-beta",
+        model_kwargs = {
+            "temperature": 0.7,
+            "max_new_token": 1024,
+            "top_k": 50,
+            "top_p": 0.95
+        }
+    )
+    return load_qa_chain(
+        llm = llm,
+        chain_type = "stuff"
+    )
+    
+# Look for existing embeddings before computing a new one
+def process_vectorstore(chunks, pdf_name):
+    db_folder = 'db'  
+    pkl_path = os.path.join(
+        db_folder,
+        f"{pdf_name}.pkl"
+    )
+    
     if os.path.exists(pkl_path):
         with open(pkl_path, "rb") as f:
-            VectorStore = pickle.load(f)
-        st.caption('Embeddings loaded locally.')
+            vectorstore = pickle.load(f)
     else:
-        embeddings = HuggingFaceInstructEmbeddings(model_name="hkunlp/instructor-xl")
-        VectorStore = FAISS.from_texts(chunks, embedding=embeddings)
-
+        embeddings = HuggingFaceInstructEmbeddings(
+        model_name = "hkunlp/instructor-base"
+        )
+        
+        vectorstore = FAISS.from_texts(
+            chunks, embeddings = embeddings
+        )
+        
         with open(pkl_path, "wb") as f:
-            pickle.dump(VectorStore, f)
-        st.caption("New embeddings computed.")
-
-    return VectorStore
-
-def get_conversation_chain(select_llm):
-    model_mapping = {
-        'oasst-sft-4': 'OpenAssistant/oasst-sft-4-pythia-12b-epoch-3.5',
-        'flan-t5-xxl': 'google/flan-t5-xxl',
-        'falcon-7b': 'tiiuae/falcon-7b-instruct'
-    }
-
-    model_id = model_mapping.get(select_llm, select_llm)
-    llm = HuggingFaceHub(repo_id=model_id, model_kwargs={"temperature": 0.3, "max_token": 512})
-    return load_qa_chain(llm=llm, chain_type="stuff")
-
-def handle_user_input(query, VectorStore, select_llm):
-    query = f"<|prompter|>{query}<|endoftext|><|assistant|>" 
+            pickle.dump(vectorstore, f)
     
-    docs = VectorStore.similarity_search(query=query, k=2)
+def process_query(query, vectorstore):
+    chain = get_converse_chain()
+    query = f"<|user|>\n{query}</s>"
     
-    chain = get_conversation_chain(select_llm)
-    response = chain.run(input_documents=docs, question=query)
+    docs = vectorstore.similarity_search(
+        query = query, k = 3
+    )
     
-    print("User query:\n", query)
-    print("AI Response:\n", response)
+    response = chain.run(
+        input_documents = docs,
+        question = query
+    )
     
-    with st.chat_message("assistant"):
-        message_placeholder = st.empty()
-        full_response = ""
-        assistant_response = response
-        for chunk in assistant_response.split():
-            full_response += chunk + " "
-            time.sleep(0.05)
-            message_placeholder.markdown(full_response + "▌")
-        message_placeholder.markdown(full_response)
-    st.session_state.messages.append({"role": "assistant", "content": full_response})
+    return response
+    
+# def display_reponse():
+
 
 def main():
-    load_dotenv()
-
-    with st.sidebar:
-        pdf = st.file_uploader("Upload your PDF", type='pdf')
-
-        if pdf is not None:
-            text = get_pdf_text(pdf)
-            chunks = get_text_chunks(text)
-            pdf_name = pdf.name[:-4]
-            VectorStore = get_vectorstore(chunks, pdf_name)
-
-        select_llm = st.selectbox(
-            'Select a large language model:',
-            ('oasst-sft-4', 'flan-t5-xxl', 'falcon-7b')
-        )
-
-    if "messages" not in st.session_state:
-        st.session_state.messages = []
-
-    for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
-
-    if query := st.chat_input("What is up?"):
-        with st.chat_message("user"):
-            st.markdown(query)
-        st.session_state.messages.append({"role": "user", "content": query})
-        
-        handle_user_input(query, VectorStore, select_llm)        
-
+    get_pdf_text()
+    process_vectorstore()
+    query = input()
+    response = process_query
+    
+    
 if __name__ == '__main__':
     main()
