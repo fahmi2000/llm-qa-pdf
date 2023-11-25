@@ -19,10 +19,10 @@ def get_pdf_text():
 
 def get_text_chunks(text):
     text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=800,
-        chunk_overlap=200,
-        length_function=len,
-        separators="\n"
+        chunk_size = 800,
+        chunk_overlap = 200,
+        length_function = len,
+        separators = "\n"
     )
     chunks = text_splitter.split_text(text = text)
     return chunks
@@ -57,7 +57,11 @@ def get_conversation_chain():
     return load_qa_chain(llm=llm, chain_type="stuff")
 
 def text_to_speech(text, language='en'):
-    tts = gTTS(text=text, lang=language, slow=False)
+    tts = gTTS(
+        text = text, 
+        lang = language, 
+        slow = False
+    )
     tts.save("response.mp3")
     os.system("start response.mp3")
 
@@ -65,7 +69,7 @@ def process_response(query, vector_store):
     chain = get_conversation_chain()
     query = f"<|system|>\nYou are a friendly customer service agent of Kuala Lumpur Internation Airport (KLIA).\n<|user|>\n{query}\n<|assistant|>"
     with concurrent.futures.ThreadPoolExecutor() as exe:
-        future_vector_search = exe.submit(vector_store.similarity_search, query=query, k=3)
+        future_vector_search = exe.submit(vector_store.similarity_search, query = query, k = 3)
         docs = future_vector_search.result()
         future_response = exe.submit(chain.run, input_documents=docs, question=query)
     
