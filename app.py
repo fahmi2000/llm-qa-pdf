@@ -1,5 +1,4 @@
 from dotenv import load_dotenv
-from gtts import gTTS
 import pickle
 from PyPDF2 import PdfReader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -54,16 +53,7 @@ def get_conversation_chain():
             "top_p": 0.95
         }
     )
-    return load_qa_chain(llm=llm, chain_type="stuff")
-
-def text_to_speech(text, language='en'):
-    tts = gTTS(
-        text = text, 
-        lang = language, 
-        slow = False
-    )
-    tts.save("response.mp3")
-    os.system("start response.mp3")
+    return load_qa_chain(llm = llm, chain_type = "stuff")
 
 def process_response(query, vector_store):
     chain = get_conversation_chain()
@@ -71,7 +61,7 @@ def process_response(query, vector_store):
     with concurrent.futures.ThreadPoolExecutor() as exe:
         future_vector_search = exe.submit(vector_store.similarity_search, query = query, k = 3)
         docs = future_vector_search.result()
-        future_response = exe.submit(chain.run, input_documents=docs, question=query)
+        future_response = exe.submit(chain.run, input_documents = docs, question = query)
     
     return future_response.result()
 
@@ -89,7 +79,6 @@ def main():
         
         response = process_response(query, vector_store)
         print(response)
-        text_to_speech(response)
 
 if __name__ == '__main__':
     main()
