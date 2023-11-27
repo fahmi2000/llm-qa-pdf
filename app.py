@@ -8,6 +8,7 @@ from langchain.llms import HuggingFaceHub
 from langchain.chains.question_answering import load_qa_chain
 import concurrent.futures
 import os
+import time
 
 def get_pdf_text():
     pdf_reader = PdfReader("klia.pdf")
@@ -77,8 +78,11 @@ def main():
         if query.lower() == 'exit':
             break
         
+        start_time = time.time()
         response = process_response(query, vector_store)
         print(response)
+        end_time = time.time()
+        print("API Response Time: ", end_time - start_time)
 
 if __name__ == '__main__':
     main()
