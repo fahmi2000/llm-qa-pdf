@@ -8,3 +8,4 @@ InstructorEmbedding
 sentence-transformers
 transformers
 python-dotenv
+scikit-learn

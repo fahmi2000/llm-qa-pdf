@@ -6,7 +6,7 @@ from langchain.embeddings import HuggingFaceInstructEmbeddings
 from langchain.vectorstores import FAISS
 from langchain.llms import HuggingFaceHub
 from langchain.chains.question_answering import load_qa_chain
-import concurrent.futures
+from sklearn.metrics.pairwise import cosine_similarity
 import os
 import time
 
@@ -67,15 +67,25 @@ def get_conversation_chain():
     return load_qa_chain(llm = llm, chain_type = "stuff")
 
 def process_response(query, vector_store):
+    THRESHOLD = 0.5
     chain = get_conversation_chain()
     query = f"<|system|>\nYou are a friendly customer service agent of Kuala Lumpur Internation Airport (KLIA).\n<|user|>\n{query}\n<|assistant|>"
     docs = vector_store.similarity_search(query = query, k = 3)
 
-    print(docs)
-    
     response =  chain.run(input_documents = docs, question = query)
+
+    start_time_similarity_score = time.time()
+    similarity_score = cosine_similarity(docs, response)
+    end_time_similarity_score = time.time()
+    print("Cosine similarity time: ", end_time_similarity_score - start_time_similarity_score)
+
+    print(similarity_score)
+
+    if similarity_score < THRESHOLD:
+        response = "Sorry, I do not know the answer to that. Please try again."
     
-    return response
+    else:
+        return response
 
 def main():
     load_dotenv()
