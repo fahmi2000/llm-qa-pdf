@@ -17,6 +17,16 @@ def get_pdf_text():
         text += page.extract_text()
     return text
 
+def get_text_file():
+    file_path = "klia.txt"
+    try:
+        with open(file_path, 'r', encoding='utf-8') as txt_file:
+            text = txt_file.read()
+        return text
+    except FileNotFoundError:
+        print(f"Error: File '{file_path}' not found.")
+        return None
+
 def get_text_chunks(text):
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size = 800,
@@ -59,16 +69,17 @@ def get_conversation_chain():
 def process_response(query, vector_store):
     chain = get_conversation_chain()
     query = f"<|system|>\nYou are a friendly customer service agent of Kuala Lumpur Internation Airport (KLIA).\n<|user|>\n{query}\n<|assistant|>"
-    with concurrent.futures.ThreadPoolExecutor() as exe:
-        future_vector_search = exe.submit(vector_store.similarity_search, query = query, k = 3)
-        docs = future_vector_search.result()
-        future_response = exe.submit(chain.run, input_documents = docs, question = query)
+    docs = vector_store.similarity_search(query = query, k = 3)
+
+    print(docs)
     
-    return future_response.result()
+    response =  chain.run(input_documents = docs, question = query)
+    
+    return response
 
 def main():
     load_dotenv()
-    text = get_pdf_text()
+    text = get_text_file()
     chunk = get_text_chunks(text)
     vector_store = get_vector_store(chunk)
     
