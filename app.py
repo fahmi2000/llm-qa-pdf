@@ -9,7 +9,7 @@ import os
 import time
 
 def get_text_file():
-    file_path = "klia.txt"
+    file_path = "Kuala_Lumpur_International_Airport.txt"
     try:
         with open(file_path, 'r', encoding='utf-8') as txt_file:
             text = txt_file.read()
@@ -30,7 +30,7 @@ def get_text_chunks(text):
 
 def get_vector_store(chunks):
     db_folder = 'db'
-    pkl_path = os.path.join(db_folder, f"klia.pkl")
+    pkl_path = os.path.join(db_folder, f"Kuala_Lumpur_International_Airport.pkl")
 
     if os.path.exists(pkl_path):
         with open(pkl_path, "rb") as f:
@@ -38,6 +38,7 @@ def get_vector_store(chunks):
 
     else:
         embeddings = HuggingFaceInstructEmbeddings(model_name = "hkunlp/instructor-base")
+        print("--------------------\n", "Computing embedding...", "\n--------------------")
         vector_store = FAISS.from_texts(chunks, embedding = embeddings)
 
         with open(pkl_path, "wb") as f:
@@ -63,11 +64,9 @@ def process_response(query, vector_store):
 
     docs = vector_store.similarity_search_with_relevance_scores(
         query, 
-        k = 3,
+        k = 5,
         score_threshold = 0.85
     )
-
-    doc_submit = vector_store.similarity_search(query, k = 3)
 
     print(docs)
 
@@ -75,7 +74,8 @@ def process_response(query, vector_store):
         response = "Sorry! I can only answer questions related to the Kuala Lumpur International Airport"
 
     else:
-        response = chain.run(input_documents = doc_submit, question = query)
+        document_strings = [doc[0] for doc in docs]
+        response = chain.run(input_documents = document_strings, question = query)
 
     return response
     
