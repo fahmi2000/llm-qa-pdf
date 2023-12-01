@@ -60,22 +60,20 @@ def get_conversation_chain():
 
 def process_response(query, vector_store):
     chain = get_conversation_chain()
-    query = f"<|system|>\nYou are a friendly customer service agent of Kuala Lumpur Internation Airport (KLIA).\n<|user|>\n{query}\n<|assistant|>"
+    template_query = f"<|system|>\nYou are a friendly customer service agent of Kuala Lumpur Internation Airport (KLIA).\n<|user|>\n{query}\n<|assistant|>"
 
     docs = vector_store.similarity_search_with_relevance_scores(
-        query, 
-        k = 5,
-        score_threshold = 0.85
+        query = query, 
+        k = 2,
+        score_threshold = 0.80
     )
-
-    print(docs)
 
     if not docs:
         response = "Sorry! I can only answer questions related to the Kuala Lumpur International Airport"
 
     else:
         document_strings = [doc[0] for doc in docs]
-        response = chain.run(input_documents = document_strings, question = query)
+        response = chain.run(input_documents = document_strings, question = template_query)
 
     return response
     
