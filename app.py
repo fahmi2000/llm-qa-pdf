@@ -9,6 +9,7 @@ import os
 import time
 
 def get_text_file():
+    print("--------------------\n", "Ingesting data...", "\n--------------------")
     file_path = "Kuala_Lumpur_International_Airport.txt"
     try:
         with open(file_path, 'r', encoding='utf-8') as txt_file:
@@ -19,6 +20,7 @@ def get_text_file():
         return None
     
 def get_text_chunks(text):
+    print("--------------------\n", "Splitting data...", "\n--------------------")
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size = 800,
         chunk_overlap = 200,
